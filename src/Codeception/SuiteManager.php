@@ -37,11 +37,16 @@ class SuiteManager {
         $this->path = $settings['path'];
 
         if ($settings['bootstrap']) $this->settings['bootstrap'] = $this->path . $settings['bootstrap'];
-        if (!file_exists($settings['path'] . $settings['class_name'].'.php')) {
-            throw new Exception\Configuration($settings['class_name'] . " class doesn't exists in suite folder.\nRun the 'build' command to generate it");
+        // check if the class already available before attempting to require        
+        if (!(array_key_exists('class_namespace', $settings) 
+            && class_exists(rtrim($settings['class_namespace'], '\\') . '\\' . $settings['class_name']))) {
+            
+            if (!file_exists($settings['path'] . $settings['class_name'] . '.php')) {
+                throw new Exception\Configuration($settings['class_name'] . " class doesn't exists in suite folder.\nRun the 'build' command to generate it");
+            }
+            
+            require_once $settings['path'] . $settings['class_name'].'.php';
         }
-
-        require_once $settings['path'] . $settings['class_name'].'.php';
         
         $this->initializeModules($settings);
     }
